@@ -3,12 +3,12 @@ const { writeFileSync, readFileSync } = require('fs');
 const puppeteer = require('puppeteer');
 const jsdom = require('jsdom');
 const nodeFetch = require('node-fetch');
-const { getZipCode, getNeighbourhoodData, convertResidentsToPercentage} = require('./utils/utils');
+const { getZipCode, getNeighbourhoodData, convertResidentsToPercentage } = require('./utils/utils');
 
 const WIDTH = 1920;
 const HEIGHT = 1080;
 
-const data = readFileSync('db.json', { encoding:'utf8', flag: 'r' });
+const data = readFileSync('db.json', { encoding: 'utf8', flag: 'r' });
 const pastResults = new Set(JSON.parse(data) || []);
 console.log('pastResults:', pastResults);
 const newResults = new Set();
@@ -16,8 +16,9 @@ const houses = [];
 const { CHAT_ID, BOT_API } = process.env;
 
 const urls = [
-    'https://www.funda.nl/zoeken/huur?selected_area=%5B%22amsterdam%22%5D&price=%22800-1750%22&object_type=%5B%22apartment%22%5D&availability=%5B%22available%22%5D&bedrooms=%222-%22',
-    'https://www.funda.nl/zoeken/huur?selected_area=%5B%22amsterdam%22%5D&price=%22700-900%22&object_type=%5B%22apartment%22%5D&availability=%5B%22available%22%5D&bedrooms=%221-%22',
+    'https://www.funda.nl/zoeken/huur?selected_area=[%22amsterdam%22]&price=%221800-2300%22&object_type=[%22apartment%22]&publication_date=%221%22&availability=[%22available%22]&floor_area=%2255-100%22&renting_condition=[%22partially_furnished%22,%22furnished%22]',
+    // 'https://www.funda.nl/zoeken/huur?selected_area=%5B%22amsterdam%22%5D&price=%22800-1750%22&object_type=%5B%22apartment%22%5D&availability=%5B%22available%22%5D&bedrooms=%222-%22',
+    // 'https://www.funda.nl/zoeken/huur?selected_area=%5B%22amsterdam%22%5D&price=%22700-900%22&object_type=%5B%22apartment%22%5D&availability=%5B%22available%22%5D&bedrooms=%221-%22',
 ];
 
 const runTask = async () => {
@@ -59,26 +60,26 @@ const runTask = async () => {
 
             // if (income) {
             //     let extraStuff = `
-// residentsIncome: **${income}**
-// neighbourhoodName: **${neighbourhoodName}**
-// municipalityName: **${municipalityName}**
-// residentsAge0to14: **${residentsAge0to14}**
-// residentsAge15to24: **${residentsAge15to24}**
-// residentsAge25to44: **${residentsAge25to44}**
-// residentsAge45to64: **${residentsAge45to64}**
-// residentsAge65AndOlder: **${residentsAge65AndOlder}**
-// householdsWithChildren: **${householdsWithChildren}**
-// residentsCount: **${residentsCount}**
-// totalImmigrantsCount: **${totalImmigrantsCount}**
-// shareOfNonImmigrants: **${shareOfNonImmigrants}**
-// shareOfMorocco: **${shareOfMorocco}**
-// shareOfAntillesOrAruba: **${shareOfAntillesOrAruba}**
-// shareOfSuriname: **${shareOfSuriname}**
-// shareOfTurkey: **${shareOfTurkey}**
-// shareOfTurkey: **${shareOfTurkey}**
-// `;
-//                 text = `${text}\n${extraStuff}`;
-//             }
+            // residentsIncome: **${income}**
+            // neighbourhoodName: **${neighbourhoodName}**
+            // municipalityName: **${municipalityName}**
+            // residentsAge0to14: **${residentsAge0to14}**
+            // residentsAge15to24: **${residentsAge15to24}**
+            // residentsAge25to44: **${residentsAge25to44}**
+            // residentsAge45to64: **${residentsAge45to64}**
+            // residentsAge65AndOlder: **${residentsAge65AndOlder}**
+            // householdsWithChildren: **${householdsWithChildren}**
+            // residentsCount: **${residentsCount}**
+            // totalImmigrantsCount: **${totalImmigrantsCount}**
+            // shareOfNonImmigrants: **${shareOfNonImmigrants}**
+            // shareOfMorocco: **${shareOfMorocco}**
+            // shareOfAntillesOrAruba: **${shareOfAntillesOrAruba}**
+            // shareOfSuriname: **${shareOfSuriname}**
+            // shareOfTurkey: **${shareOfTurkey}**
+            // shareOfTurkey: **${shareOfTurkey}**
+            // `;
+            //                 text = `${text}\n${extraStuff}`;
+            //             }
 
             nodeFetch(`https://api.telegram.org/bot${BOT_API}/sendMessage`, {
                 method: 'POST',
@@ -87,8 +88,8 @@ const runTask = async () => {
                 },
                 body: JSON.stringify({
                     text,
-                    chat_id : CHAT_ID,
-                    parse_mode : 'markdown',
+                    chat_id: CHAT_ID,
+                    parse_mode: 'markdown',
                 }),
             });
         });
@@ -121,7 +122,7 @@ const runPuppeteer = async (url) => {
     const result = dom.window.document.getElementsByClassName("border-light-2 mb-4 border-b pb-4")
     for (const element of result) {
         const urlPath = element?.querySelectorAll('a')?.[0]?.href;
-        if  (!urlPath) {  // workaround for fake results
+        if (!urlPath) {  // workaround for fake results
             continue
         }
         const headerSubtitle = element?.querySelector('.text-dark-1');
