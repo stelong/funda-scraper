@@ -47,6 +47,8 @@ jobs:
           CHAT_ID: ${{ secrets.CHAT_ID }}
           BOT_API: ${{ secrets.BOT_API }}
           SEND_TELEGRAM: '1'
+          # Save debug HTML and screenshot for inspection on CI
+          SAVE_HTML: '1'
 
       - name: Commit db.json
         uses: stefanzweifel/git-auto-commit-action@v4
@@ -55,3 +57,13 @@ jobs:
           branch: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload debug artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: funda-debug-files
+          path: |
+            debug-funda-*.html
+            debug-funda-*.png
+            db.json
