@@ -53,7 +53,7 @@ const runTask = async () => {
                 path,
                 room,
             }) => {
-                const text = `New house on ${date}: [click here](${path}) (${room}).`;
+                const text = `New house on ${date}: [view here](${path})`;
 
                 nodeFetch(`https://api.telegram.org/bot${BOT_API}/sendMessage`, {
                     method: 'POST',
