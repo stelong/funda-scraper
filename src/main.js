@@ -97,7 +97,9 @@ const runPuppeteer = async (url) => {
     let page;
     try {
         page = await browser.newPage();
-        await page.setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36');
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36');
+        // Prefer Dutch language and add headers to appear more like a real browser
+        await page.setExtraHTTPHeaders({ 'accept-language': 'nl-NL,nl;q=0.9,en-US;q=0.8,en;q=0.7' });
 
         console.log('going to funda');
         // Wait for network to be idle to allow client-side rendering
@@ -129,12 +131,16 @@ const runPuppeteer = async (url) => {
             // swallow errors from cookie handling
         }
 
-        // Wait for the listing container to appear (use class chain equivalent)
+        // Wait for the listing container or any listing link to appear.
         try {
-            await page.waitForSelector('.border-light-2.mb-4.border-b.pb-4', { timeout: 20000 });
+            await page.waitForSelector('.border-light-2.mb-4.border-b.pb-4', { timeout: 30000 });
         } catch (err) {
-            // selector didn't appear quickly; proceed to grab content anyway
-            console.warn('Listing selector not found within timeout; continuing to capture page content');
+            // If the preferred container didn't appear, try waiting for detail links
+            try {
+                await page.waitForSelector('a[href^="/detail/"]', { timeout: 30000 });
+            } catch (err2) {
+                console.warn('Listing selector not found within timeout; continuing to capture page content');
+            }
         }
 
         const htmlString = await page.content();
