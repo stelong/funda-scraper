@@ -5,6 +5,7 @@
   "main": "src/main.js",
   "scripts": {
     "task": "node src/main.js",
+    "task:dry": "SAVE_HTML=1 SEND_TELEGRAM=0 node src/main.js",
     "bump": "ncu -u -t minor"
   },
   "repository": {
@@ -20,7 +21,7 @@
   "dependencies": {
     "dotenv": "^16.0.0",
     "esm": "^3.2.25",
-    "jsdom": "^19.0.0",
+    "jsdom": "^21.0.0",
     "node-fetch": "2.6.7",
     "npm-check-updates": "^19.1.2",
     "puppeteer": "^24.31.0"

@@ -33,6 +33,7 @@ jobs:
         env:
           CHAT_ID: ${{ secrets.CHAT_ID }}
           BOT_API: ${{ secrets.BOT_API }}
+          SEND_TELEGRAM: '1'
 
       - name: Commit db.json
         uses: stefanzweifel/git-auto-commit-action@v4
