@@ -31,29 +31,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Install apt dependencies for Chromium
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            ca-certificates \
-            fonts-liberation \
-            libatk1.0-0 \
-            libatk-bridge2.0-0 \
-            libcairo2 \
-            libdrm2 \
-            libgbm1 \
-            libgtk-3-0 \
-            libnspr4 \
-            libnss3 \
-            libx11-xcb1 \
-            libxcomposite1 \
-            libxcursor1 \
-            libxdamage1 \
-            libxrandr2 \
-            libxss1 \
-            libasound2 \
-            libpangocairo-1.0-0
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
