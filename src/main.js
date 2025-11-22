@@ -98,101 +98,115 @@ const runTask = async () => {
 
 const runPuppeteer = async (url) => {
     console.log('opening headless browser');
+
+    // Add no-sandbox flags for CI (GitHub Actions) and extra stability flags.
     const browser = await puppeteer.launch({
         headless: true,
-        args: [`--window-size=${WIDTH},${HEIGHT}`],
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage', // avoid /dev/shm issues
+            '--disable-gpu',
+            '--no-zygote',
+            '--single-process',
+            `--window-size=${WIDTH},${HEIGHT}`
+        ],
         defaultViewport: {
             width: WIDTH,
             height: HEIGHT,
         },
     });
 
-    const page = await browser.newPage();
-    // https://stackoverflow.com/a/51732046/4307769 https://stackoverflow.com/a/68780400/4307769
-    await page.setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36');
+    let page;
+    try {
+        page = await browser.newPage();
+        await page.setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36');
 
-    console.log('going to funda');
-    await page.goto(url, { waitUntil: 'domcontentloaded' });
+        console.log('going to funda');
+        await page.goto(url, { waitUntil: 'domcontentloaded' });
 
-    const htmlString = await page.content();
-    const dom = new jsdom.JSDOM(htmlString);
+        const htmlString = await page.content();
+        const dom = new jsdom.JSDOM(htmlString);
 
 
-    console.log('parsing funda.nl data');
-    const result = dom.window.document.getElementsByClassName("border-light-2 mb-4 border-b pb-4")
-    for (const element of result) {
-        const urlPath = element?.querySelectorAll('a')?.[0]?.href;
-        if (!urlPath) {  // workaround for fake results
-            continue
-        }
-        const headerSubtitle = element?.querySelector('.text-dark-1');
-        const subtitleText = headerSubtitle?.innerHTML?.trim();
+        console.log('parsing funda.nl data');
+        const result = dom.window.document.getElementsByClassName("border-light-2 mb-4 border-b pb-4")
+        for (const element of result) {
+            const urlPath = element?.querySelectorAll('a')?.[0]?.href;
+            if (!urlPath) {  // workaround for fake results
+                continue
+            }
+            const headerSubtitle = element?.querySelector('.text-dark-1');
+            const subtitleText = headerSubtitle?.innerHTML?.trim();
 
-        let path = urlPath;
-        if (!path.includes('https://www.funda.nl')) {
-            path = `https://www.funda.nl${urlPath}`;
-        }
+            let path = urlPath;
+            if (!path.includes('https://www.funda.nl')) {
+                path = `https://www.funda.nl${urlPath}`;
+            }
 
-        path = path.replace('?navigateSource=resultlist', '');
-        if (path && !pastResults.has(path) && !newResults.has(path)) {
-            let extraDetails = {};
-            // const zipCode = getZipCode(subtitleText || '');
-            const zipCode = null;
+            path = path.replace('?navigateSource=resultlist', '');
+            if (path && !pastResults.has(path) && !newResults.has(path)) {
+                let extraDetails = {};
+                // const zipCode = getZipCode(subtitleText || '');
+                const zipCode = null;
 
-            if (zipCode) {
-                const neighbourhoodData = await getNeighbourhoodData(zipCode);
+                if (zipCode) {
+                    const neighbourhoodData = await getNeighbourhoodData(zipCode);
 
-                if (neighbourhoodData) {
-                    const residentsCount = neighbourhoodData?.['AantalInwoners_5']?.value || 0;
-                    const westernImmigrantsCount = neighbourhoodData?.['WestersTotaal_17']?.value || 0;
-                    const nonWesternImmigrantsCount = neighbourhoodData?.['NietWestersTotaal_18']?.value || 0;
-                    const totalImmigrantsCount = westernImmigrantsCount + nonWesternImmigrantsCount;
-                    const income = neighbourhoodData?.['GemiddeldInkomenPerInwoner_66']?.value * 1000;
+                    if (neighbourhoodData) {
+                        const residentsCount = neighbourhoodData?.['AantalInwoners_5']?.value || 0;
+                        const westernImmigrantsCount = neighbourhoodData?.['WestersTotaal_17']?.value || 0;
+                        const nonWesternImmigrantsCount = neighbourhoodData?.['NietWestersTotaal_18']?.value || 0;
+                        const totalImmigrantsCount = westernImmigrantsCount + nonWesternImmigrantsCount;
+                        const income = neighbourhoodData?.['GemiddeldInkomenPerInwoner_66']?.value * 1000;
 
+                        extraDetails = {
+                            ...extraDetails,
+                            income,
+                            residentsAge0to14: neighbourhoodData['k_0Tot15Jaar_8'].value,
+                            residentsAge15to24: neighbourhoodData['k_15Tot25Jaar_9'].value,
+                            residentsAge25to44: neighbourhoodData['k_25Tot45Jaar_10'].value,
+                            residentsAge45to64: neighbourhoodData['k_45Tot65Jaar_11'].value,
+                            residentsAge65AndOlder: neighbourhoodData['k_65JaarOfOuder_12'].value,
+                            householdsWithChildren: neighbourhoodData['HuishoudensMetKinderen_31'].value,
+                            totalImmigrantsCount,
+                            shareOfMorocco: convertResidentsToPercentage(residentsCount, neighbourhoodData['Marokko_19'].value),
+                            shareOfAntillesOrAruba: convertResidentsToPercentage(residentsCount, neighbourhoodData['NederlandseAntillenEnAruba_20'].value),
+                            shareOfSuriname: convertResidentsToPercentage(residentsCount, neighbourhoodData['Suriname_21'].value),
+                            shareOfTurkey: convertResidentsToPercentage(residentsCount, neighbourhoodData['Turkije_22'].value),
+                            shareOfNonImmigrants: convertResidentsToPercentage(residentsCount, residentsCount - totalImmigrantsCount),
+                            neighbourhoodName: neighbourhoodData.neighbourhoodName.value,
+                            municipalityName: neighbourhoodData.municipalityName.value,
+                            residentsCount,
+                        };
+                    }
+                }
+
+                if (url.includes("%22700-900%22")) {
                     extraDetails = {
                         ...extraDetails,
-                        income,
-                        residentsAge0to14: neighbourhoodData['k_0Tot15Jaar_8'].value,
-                        residentsAge15to24: neighbourhoodData['k_15Tot25Jaar_9'].value,
-                        residentsAge25to44: neighbourhoodData['k_25Tot45Jaar_10'].value,
-                        residentsAge45to64: neighbourhoodData['k_45Tot65Jaar_11'].value,
-                        residentsAge65AndOlder: neighbourhoodData['k_65JaarOfOuder_12'].value,
-                        householdsWithChildren: neighbourhoodData['HuishoudensMetKinderen_31'].value,
-                        totalImmigrantsCount,
-                        shareOfMorocco: convertResidentsToPercentage(residentsCount, neighbourhoodData['Marokko_19'].value),
-                        shareOfAntillesOrAruba: convertResidentsToPercentage(residentsCount, neighbourhoodData['NederlandseAntillenEnAruba_20'].value),
-                        shareOfSuriname: convertResidentsToPercentage(residentsCount, neighbourhoodData['Suriname_21'].value),
-                        shareOfTurkey: convertResidentsToPercentage(residentsCount, neighbourhoodData['Turkije_22'].value),
-                        shareOfNonImmigrants: convertResidentsToPercentage(residentsCount, residentsCount - totalImmigrantsCount),
-                        neighbourhoodName: neighbourhoodData.neighbourhoodName.value,
-                        municipalityName: neighbourhoodData.municipalityName.value,
-                        residentsCount,
+                        room: "single",
+                    };
+                } else {
+                    extraDetails = {
+                        ...extraDetails,
+                        room: "double",
                     };
                 }
-            }
 
-            if (url.includes("%22700-900%22")) {
-                extraDetails = {
+                newResults.add(path);
+                houses.push({
                     ...extraDetails,
-                    room: "single",
-                };
-            } else {
-                extraDetails = {
-                    ...extraDetails,
-                    room: "double",
-                };
+                    path,
+                });
             }
-
-            newResults.add(path);
-            houses.push({
-                ...extraDetails,
-                path,
-            });
         }
-    }
 
-    console.log('closing browser');
-    await browser.close();
+    } finally {
+        console.log('closing browser');
+        if (page) await page.close().catch(() => { });
+        await browser.close().catch(() => { });
+    }
 };
 
 if (CHAT_ID && BOT_API) {
