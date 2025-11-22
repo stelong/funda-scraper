@@ -1,8 +1,17 @@
+permissions:
+  contents: write
+
 name: Run Task
 on:
   workflow_dispatch:
   schedule:
     - cron: "*/10 * * * *"
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
 
 jobs:
   build-and-deploy:
@@ -10,9 +19,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          ref: ${{ github.head_ref }}
+          node-version: '18'
 
       - name: Running
         run: |
@@ -25,7 +37,10 @@ jobs:
           CHAT_ID: ${{ secrets.CHAT_ID }}
           BOT_API: ${{ secrets.BOT_API }}
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - name: Commit db.json
+        uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Update db.json
           branch: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
