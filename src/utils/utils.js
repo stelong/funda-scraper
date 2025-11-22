@@ -1,24 +1,24 @@
-// Code mostly from https://github.com/nikitaindik/funda-neighbourhoods/blob/de9b65b255a4c03a9ddb581e1472f6970240d9f7/src/content/content.js#L17
-import { fetchNeighbourhoodMeta, fetchNeighbourhoodStats } from './api';
+// Converted to CommonJS for compatibility with `require()` in `src/main.js`
+const { fetchNeighbourhoodMeta, fetchNeighbourhoodStats } = require('./api');
 
-export const convertResidentsToPercentage = (residentsCount, categoryCount) => {
+const convertResidentsToPercentage = (residentsCount, categoryCount) => {
     const shareOfResidents = categoryCount / residentsCount;
     const integerPercentage = Math.round(shareOfResidents * 100);
     return `${categoryCount} (${integerPercentage}%)`;
 }
 
-export const getZipCode = (elementText) => {
+const getZipCode = (elementText) => {
     const zipCodeRe = /\d\d\d\d\s*[A-Z][A-Z]/;
     const match = elementText.match(zipCodeRe);
 
-    if (match[0]) {
+    if (match && match[0]) {
         return match[0].replaceAll(' ', '');
     }
 
     return null;
 }
 
-export const getNeighbourhoodData = async (zipCode) => {
+const getNeighbourhoodData = async (zipCode) => {
     const neighbourhoodMeta = await fetchNeighbourhoodMeta(zipCode);
     if (!neighbourhoodMeta) {
         return null;
@@ -36,3 +36,9 @@ export const getNeighbourhoodData = async (zipCode) => {
         ...neighbourhood,
     };
 }
+
+module.exports = {
+    convertResidentsToPercentage,
+    getZipCode,
+    getNeighbourhoodData,
+};

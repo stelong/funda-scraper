@@ -1,5 +1,5 @@
-// Code from https://github.com/nikitaindik/funda-neighbourhoods/blob/de9b65b255a4c03a9ddb581e1472f6970240d9f7/src/background/api.js
-import nodeFetch from 'node-fetch';
+// Converted to CommonJS to be compatible with `require()` in `src/main.js`
+const nodeFetch = require('node-fetch');
 
 const STATS_API_ID_BY_YEAR = {
     2015: '83220NED',
@@ -11,7 +11,7 @@ const STATS_API_ID_BY_YEAR = {
     2021: '85039NED',
 };
 
-export async function fetchNeighbourhoodMeta(zipCode) {
+const fetchNeighbourhoodMeta = async (zipCode) => {
     const parameters = {
         q: zipCode,
         fq: 'type:adres',
@@ -34,13 +34,13 @@ export async function fetchNeighbourhoodMeta(zipCode) {
     } catch (error) {
         return null;
     }
-}
+};
 
-export async function fetchNeighbourhoodStats(neighbourhoodCode) {
+const fetchNeighbourhoodStats = async (neighbourhoodCode) => {
     const neighbourhoodStatsWithYears = await getNeighbourhoodStatsWithYears(neighbourhoodCode);
 
     return mergeYearlyData(neighbourhoodStatsWithYears);
-}
+};
 
 async function getNeighbourhoodStatsWithYears(neighbourhoodCode) {
     const years = Object.keys(STATS_API_ID_BY_YEAR);
@@ -108,3 +108,8 @@ function getParametersString(parameters) {
         .map(([name, value]) => `${name}=${encodeURIComponent(value)}`)
         .join('&');
 }
+
+module.exports = {
+    fetchNeighbourhoodMeta,
+    fetchNeighbourhoodStats,
+};

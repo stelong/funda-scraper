@@ -17,8 +17,6 @@ const { CHAT_ID, BOT_API } = process.env;
 
 const urls = [
     'https://www.funda.nl/zoeken/huur?selected_area=[%22amsterdam%22]&price=%221800-2300%22&object_type=[%22apartment%22]&publication_date=%221%22&availability=[%22available%22]&floor_area=%2255-100%22&renting_condition=[%22partially_furnished%22,%22furnished%22]',
-    // 'https://www.funda.nl/zoeken/huur?selected_area=%5B%22amsterdam%22%5D&price=%22800-1750%22&object_type=%5B%22apartment%22%5D&availability=%5B%22available%22%5D&bedrooms=%222-%22',
-    // 'https://www.funda.nl/zoeken/huur?selected_area=%5B%22amsterdam%22%5D&price=%22700-900%22&object_type=%5B%22apartment%22%5D&availability=%5B%22available%22%5D&bedrooms=%221-%22',
 ];
 
 const runTask = async () => {
@@ -39,47 +37,8 @@ const runTask = async () => {
         houses.forEach(({
             path,
             room,
-            // income,
-            // residentsAge0to14,
-            // residentsAge15to24,
-            // residentsAge25to44,
-            // residentsAge45to64,
-            // residentsAge65AndOlder,
-            // householdsWithChildren,
-            // shareOfMorocco,
-            // shareOfAntillesOrAruba,
-            // shareOfSuriname,
-            // shareOfTurkey,
-            // neighbourhoodName,
-            // municipalityName,
-            // shareOfNonImmigrants,
-            // residentsCount,
-            // totalImmigrantsCount,
         }) => {
             let text = `New house on ${date}: [click here](${path}) (${room}).`;
-
-            // if (income) {
-            //     let extraStuff = `
-            // residentsIncome: **${income}**
-            // neighbourhoodName: **${neighbourhoodName}**
-            // municipalityName: **${municipalityName}**
-            // residentsAge0to14: **${residentsAge0to14}**
-            // residentsAge15to24: **${residentsAge15to24}**
-            // residentsAge25to44: **${residentsAge25to44}**
-            // residentsAge45to64: **${residentsAge45to64}**
-            // residentsAge65AndOlder: **${residentsAge65AndOlder}**
-            // householdsWithChildren: **${householdsWithChildren}**
-            // residentsCount: **${residentsCount}**
-            // totalImmigrantsCount: **${totalImmigrantsCount}**
-            // shareOfNonImmigrants: **${shareOfNonImmigrants}**
-            // shareOfMorocco: **${shareOfMorocco}**
-            // shareOfAntillesOrAruba: **${shareOfAntillesOrAruba}**
-            // shareOfSuriname: **${shareOfSuriname}**
-            // shareOfTurkey: **${shareOfTurkey}**
-            // shareOfTurkey: **${shareOfTurkey}**
-            // `;
-            //                 text = `${text}\n${extraStuff}`;
-            //             }
 
             nodeFetch(`https://api.telegram.org/bot${BOT_API}/sendMessage`, {
                 method: 'POST',
