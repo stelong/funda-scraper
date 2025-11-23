@@ -22,7 +22,7 @@ const SAVE_HTML = process.env.SAVE_HTML === '1' || process.env.DEBUG === '1' || 
 const SEND_TELEGRAM = !(process.env.SEND_TELEGRAM === '0' || process.env.SEND_TELEGRAM === 'false');
 
 const urls = [
-    'https://www.funda.nl/zoeken/huur?selected_area=[%22amsterdam%22]&price=%221800-2300%22&object_type=[%22apartment%22]&publication_date=%221%22&availability=[%22available%22]&floor_area=%2255-100%22&renting_condition=[%22partially_furnished%22,%22furnished%22]',
+    'https://www.funda.nl/zoeken/huur?selected_area=[%22amsterdam%22]&price=%221800-2300%22&object_type=[%22apartment%22]&availability=[%22available%22]&floor_area=%2255-100%22&renting_condition=[%22furnished%22]',
 ];
 
 const runTask = async () => {

@@ -47,8 +47,7 @@ jobs:
           CHAT_ID: ${{ secrets.CHAT_ID }}
           BOT_API: ${{ secrets.BOT_API }}
           SEND_TELEGRAM: '1'
-          # Save debug HTML and screenshot for inspection on CI
-          SAVE_HTML: '1'
+          SAVE_HTML: '0'
 
       - name: Commit db.json
         uses: stefanzweifel/git-auto-commit-action@v4
